@@ -1,5 +1,11 @@
 <?php
 // $Id$
+/**
+ * Implementation of hook_apachesolr_modify_query.
+ *
+ * The presence of this function inhibits the addition of 'fq=entity:node',
+ * which is what we need when calling an external index..
+ */
+
 function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller) {
-  $params['fq'] = '';
 }
