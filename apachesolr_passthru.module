@@ -1,0 +1,5 @@
+<?php
+// $Id$
+function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller) {
+  $params['fq'] = '';
+}
