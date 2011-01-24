@@ -1,6 +1,13 @@
 <?php
 // $Id$
 /**
+* Implementation of hook_views_api().
+*/
+function apachesolr_passthru_views_api() {
+  return array('api' => '3');
+}
+
+/**
  * Implementation of hook_apachesolr_modify_query.
  */
 function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller) {
