@@ -58,4 +58,14 @@ function apachesolr_passthru_views_data_alter(&$data) {
       'handler' => 'apachesolr_passthru_handler_field_text',
     ),
   );
+  $data['apachesolr_node']['uk_sic_03'] = array(
+    'title' => t('SIC(03)'),
+    'help' => t('The company\'s SIC(03) code.'),
+    'field' => array(
+      'handler' => 'apachesolr_passthru_handler_field_text',
+    ),
+    'filter' => array(
+      'handler' => 'apachesolr_passthru_handler_filter_text',
+    ),
+  );
 }
