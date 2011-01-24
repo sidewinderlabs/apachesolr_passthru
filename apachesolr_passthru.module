@@ -2,10 +2,24 @@
 // $Id$
 /**
  * Implementation of hook_apachesolr_modify_query.
- *
- * The presence of this function inhibits the addition of 'fq=entity:node',
- * which is what we need when calling an external index..
  */
-
 function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller) {
+  if ($caller == 'apachesolr_search') {
+    $params['fl'] .= ',company_name,cro_number,line_of_business,postcode,telephone_number,uk_sic_03';
+  }
+}
+
+/**
+ * Implementation of hook_apachesolr_finalize_query.
+ */
+function apachesolr_views_query_finalize_query(&$query, &$params) {
+dargs();
+  $params['q'] = '';
+}
+
+function apachesolr_passthru_apachesolr_search_result_alter(&$doc) {
+  $doc->path = 'company/' . $doc->cro_number;
+  $doc->title = $doc->company_name;
+  $doc->body = $doc->postcode . ' - ' . $doc->uk_sic_03 . ' - ' . $doc->line_of_business;
+  return $doc;
 }
