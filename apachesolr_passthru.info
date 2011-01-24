@@ -1,5 +1,7 @@
 name = Apache Solr pass-thru
 description = Allow searching of Solr indexes that were created outside of Drupal.
 dependencies[] = apachesolr
+dependencies[] = apachesolr_views
+dependencies[] = views
 package = Apache Solr
 core = "6.x"
