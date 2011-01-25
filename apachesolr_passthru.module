@@ -74,11 +74,12 @@ function apachesolr_passthru_block($op = 'list', $delta = 0, $edit = array()) {
         $query = apachesolr_current_query();
 
         $enabled_facets = apachesolr_get_enabled_facets('apachesolr_passthru');
-        $key = $enabled_facets[$delta];
-        if (empty($key)) {
+        $facets = apachesolr_passthru_apachesolr_facets();
+        $facet = $facets[$enabled_facets[$delta]];
+        if (empty($facet)) {
           return;
         }
-        return apachesolr_facet_block($response, $query, 'apachesolr_passthru', $delta, $key, t('Filter by SIC(03)'));
+        return apachesolr_facet_block($response, $query, 'apachesolr_passthru', $delta, $facet['facet_field'], t($facet['info']));
       }
       break;
 
