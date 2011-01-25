@@ -40,9 +40,10 @@ function apachesolr_passthru_apachesolr_search_result_alter(&$doc) {
 function apachesolr_passthru_apachesolr_facets() {
   $facets = array();
 
-  $facets['uk_sic_03'] = array(
+  $key = 'uk_sic_03';
+  $facets[$key] = array(
     'info' => t('Apache Solr Passthru: Filter by SIC(03)'),
-    'facet_field' => 'uk_sic_03',
+    'facet_field' => $key,
   );
   return $facets;
 }
