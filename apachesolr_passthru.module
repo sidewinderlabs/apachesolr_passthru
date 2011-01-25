@@ -40,13 +40,12 @@ function apachesolr_passthru_apachesolr_search_result_alter(&$doc) {
 function apachesolr_passthru_apachesolr_facets() {
   $facets = array();
 
-  $facets['type'] = array(
+  $facets['uk_sic_03'] = array(
     'info' => t('Apache Solr Passthru: Filter by SIC(03)'),
     'facet_field' => 'uk_sic_03',
   );
   return $facets;
 }
-
 
 /**
  * Implementation of hook_block().
@@ -79,36 +78,7 @@ function apachesolr_passthru_block($op = 'list', $delta = 0, $edit = array()) {
         if (empty($key)) {
           return;
         }
-
-        $facet = $response->facet_counts->facet_fields->{$key};
-        if (is_object($facet)) {
-          $facets = array();
-
-          foreach($facet as $facet_field => $count) {
-            if ($facet_field != '_empty_') {
-              $active = $query->has_filter($key, $facet_field);
-              $facets[$facet_field] = array(
-                '#name' => $key,
-                '#value' => $facet_field,
-                '#exclude' => FALSE,
-                '#count' => $count,
-                '#parent' => 0,
-                '#children' => array(),
-                '#has_children' => false,
-                '#active' => $active,
-              );
-            }
-          }
-
-          $items = apachesolr_search_nested_facet_items($query, $facets, $response->response->numFound);
-          if ($items && ($response->response->numFound > 0)) {
-            $limit = isset($initial_limits['apachesolr_passthru'][$key]) ? $initial_limits['apachesolr_passthru'][$key] : $limit_default;
-            return array(
-              'subject' => t('Filter by SIC(03)'),
-              'content' => theme('apachesolr_facet_list', $items, $limit),
-            );
-          }
-        }
+        return apachesolr_facet_block($response, $query, 'apachesolr_passthru', $delta, $key, t('Filter by SIC(03)'));
       }
       break;
 
