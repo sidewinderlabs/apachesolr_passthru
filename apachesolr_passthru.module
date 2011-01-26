@@ -43,7 +43,7 @@ function apachesolr_passthru_apachesolr_facets() {
 
   $key = 'sic_trade_classification_code';
   $facets[$key] = array(
-    'info' => t('Apache Solr Passthru: Filter by SIC(03)'),
+    'info' => t('Filter by SIC(03)'),
     'facet_field' => $key,
   );
   return $facets;
