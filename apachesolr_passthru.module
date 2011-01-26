@@ -12,7 +12,9 @@ function apachesolr_passthru_views_api() {
  */
 function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller) {
   if ($caller == 'apachesolr_search') {
-    $params['fl'] .= ',company_name,cro_number,line_of_business,postcode,telephone_number,uk_sic_03';
+    // 'name' is already included elsewhere.
+    //
+    $params['fl'] .= ',address_line_1,address_line_2,address_line_3,address_line_4,company_number,postcode,sic_trade_classification_code';
   }
 }
 
@@ -20,14 +22,13 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
  * Implementation of hook_apachesolr_finalize_query.
  */
 function apachesolr_views_query_finalize_query(&$query, &$params) {
-dargs();
   $params['q'] = '';
 }
 
 function apachesolr_passthru_apachesolr_search_result_alter(&$doc) {
-  $doc->path = 'company/' . $doc->cro_number;
-  $doc->title = $doc->company_name;
-  $doc->body = $doc->postcode . ' - ' . $doc->uk_sic_03 . ' - ' . $doc->line_of_business;
+  $doc->path = 'company/' . $doc->company_number;
+  $doc->title = $doc->name;
+  $doc->body = $doc->address_line_1 . ', ' . $doc->address_line_2 . ', ' . $doc->address_line_3 . ', ' . $doc->address_line_4 . ', ' . $doc->postcode . ' - ' . $doc->sic_trade_classification_code;
   return $doc;
 }
 
@@ -40,7 +41,7 @@ function apachesolr_passthru_apachesolr_search_result_alter(&$doc) {
 function apachesolr_passthru_apachesolr_facets() {
   $facets = array();
 
-  $key = 'uk_sic_03';
+  $key = 'sic_trade_classification_code';
   $facets[$key] = array(
     'info' => t('Apache Solr Passthru: Filter by SIC(03)'),
     'facet_field' => $key,
