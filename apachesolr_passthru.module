@@ -68,11 +68,16 @@ function apachesolr_passthru_apachesolr_search_result_alter(&$doc) {
 function apachesolr_passthru_apachesolr_facets() {
   $facets = array();
 
-  $key = 'sic_trade_classification_code';
-  $facets[$key] = array(
-    'info' => t('Filter by SIC(03)'),
-    'facet_field' => $key,
-  );
+  $fields = _get_apachesolr_passthru_field_list();
+
+  foreach($fields as $field) {
+    $key = $field[0];
+    $facets[$key] = array(
+      'info' => t('Filter by ' . $key),
+      'facet_field' => $key,
+    );
+  }
+  //kpr($facets);
   return $facets;
 }
 
