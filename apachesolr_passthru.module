@@ -18,6 +18,33 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
   }
 }
 
+function _get_apachesolr_passthru_field_list() {
+  $data = (object) array();
+  try {
+    $solr = apachesolr_get_solr();
+    $data = $solr->getLuke();
+  }
+  catch (Exception $e) {
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+    drupal_set_message(nl2br(check_plain($e->getMessage())), "warning");
+    $data->fields = array();
+  }
+
+  $rows = array();
+  $fields = (array)$data->fields;
+  if ($fields) {
+    foreach ($fields as $name => $field) {
+      // Skip over 'text' because there's a special filter for that
+      // already in apachesolr_views.
+      //
+      if ($name != 'text') {
+        $rows[$name] = array($name, $field->type, isset($field->distinct) ? $field->distinct : $not_found);
+      }
+    }
+  }
+  return $rows;
+}
+
 /**
  * Implementation of hook_apachesolr_finalize_query.
  */
