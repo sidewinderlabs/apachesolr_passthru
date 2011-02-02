@@ -55,7 +55,7 @@ function apachesolr_views_query_finalize_query(&$query, &$params) {
 function apachesolr_passthru_apachesolr_search_result_alter(&$doc) {
   $doc->path = 'company/' . $doc->company_number;
   $doc->title = $doc->name;
-  $doc->body = $doc->address_line_1 . ', ' . $doc->address_line_2 . ', ' . $doc->address_line_3 . ', ' . $doc->address_line_4 . ', ' . $doc->postcode . ' - ' . $doc->sic_trade_classification_code;
+  $doc->body = $doc->address_line_1 . ', ' . $doc->address_line_2 . ', ' . $doc->address_line_3 . ', ' . $doc->address_line_4 . ', ' . $doc->postcode;
   return $doc;
 }
 
