@@ -12,10 +12,12 @@ class apachesolr_passthru_handler_argument_text
     else {
       $this->value = array($this->argument);
     }
+    $arg_value = array();
     foreach ($this->value as $facet_value) {
-      $this->query->set_query($this->real_field . ":" . Drupal_Apache_Solr_Service::escape($facet_value));
-      //$this->query->add_filter($this->real_field, apachesolr_views_query::escape_term($facet_value), $this->options['not']);
+      $arg_value[] = apachesolr_views_query::escape_term($facet_value);
     }
+    $this->query->add_filter($this->real_field, implode(" OR ", $arg_value), $this->options['not']);
+    $this->query->set_query("*");
   }
 
   function option_definition() {
