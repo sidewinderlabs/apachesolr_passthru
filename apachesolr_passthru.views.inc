@@ -50,7 +50,6 @@ function apachesolr_passthru_views_data() {
     ),
     );
   }
-  var_dump($data);
   return $data;
 }
 
