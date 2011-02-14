@@ -1,8 +1,8 @@
 <?php
 // $Id$
 /**
-* Implementation of hook_views_api().
-*/
+ * Implementation of hook_views_api().
+ */
 function apachesolr_passthru_views_api() {
   return array('api' => '3');
 }
@@ -126,3 +126,11 @@ function apachesolr_passthru_block($op = 'list', $delta = 0, $edit = array()) {
       break;
   }
 }
+
+/**
+ * Implementation of hook_theme().
+ */
+function apachesolr_passthru_theme() {
+  return array();
+}
+
