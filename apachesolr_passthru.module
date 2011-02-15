@@ -134,3 +134,132 @@ function apachesolr_passthru_theme() {
   return array();
 }
 
+/**
+ * Implementation of hook_menu().
+ */
+function apachesolr_passthru_menu() {
+ return array(
+   // Callback to display solr server admin
+   'admin/settings/apachesolr/otherservers' => array(
+      'title' => 'Other Solr Servers',
+      'description' => 'Details of other solr servers, add to make available to views.',
+      'page callback' => 'apachesolr_passthru_setup',
+      'access arguments' => array('administer search'),
+      'type' => MENU_LOCAL_TASK,
+   ),
+   // Callback to add/edit server form
+   'admin/settings/apachesolr/otherservers/add' => array(
+      'title' => 'add/edit server',
+      'description' => 'callback for adding editing a form',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('apachesolr_passthru_server_form'),
+      'access arguments' => array('administer search'),
+      'type' => MENU_CALLBACK,
+   ),
+   // Callback to delete a server
+ ); 
+}
+
+/**
+ * Callback to display solr servers listing and administration page.
+ */
+ 
+function apachesolr_passthru_setup() {
+  // Get a list of defined solr servers and display their details.
+  $servers =  apachesolr_passthru_get_servers() ;
+
+  $output_table_headers = array( 'Server Name', 'server address', 'server port', 'server path', 'status', 'action');
+  $output_table_rows = array();
+  foreach($servers as $server) {
+    $output_table_rows[] = array($server['name'],$server['solr_url'],$server['solr_port'],$server['solr_path'],'test','test');
+  }
+  if (sizeof($servers) > 0 ) {
+  
+    $output = theme('table',$output_table_headers,$output_table_rows);
+  }
+  else {
+    $output = t('No servers defined yet. ');  
+  }
+  
+  $output .= l('add_server','admin/settings/apachesolr/otherservers/add');
+  return $output;
+}
+
+/**
+ * Defgroup: Admin form handling functions 
+ */
+
+/**
+ * Generate a form for the solr server admin page.
+ * @param unknown_type $form_state
+ */
+function apachesolr_passthru_server_form($form_state) {
+  $form = array();
+  
+  $form['name'] = array('#type' => 'textfield',
+                        '#title' => t('Server Name'));
+  $form['solr_url'] = array('#type' => 'textfield',
+                        '#title' => t('Server Address'));
+  $form['solr_port'] = array('#type' => 'textfield',
+                        '#title' => t('Server Port'));
+  $form['solr_path'] = array('#type' => 'textfield',
+                        '#title' => t('Server Path'));
+  $form['submit_button'] = array('#type' => 'submit',
+                          '#value' => t('Save Server Details'),
+                          );
+  $form['#submit'][] = 'apachesolr_passthru_server_form_submit';
+  $form['#validate'][] = 'apachesolr_passthru_server_form_validate';
+  
+  return $form;
+}
+
+function apachesolr_passthru_server_form_submit(&$form, $form_state) {
+  $server = array();
+  $server['name'] = $form_state['values']['name'];
+  $server['solr_url'] = $form_state['values']['solr_url'];
+  $server['solr_port'] = $form_state['values']['solr_port'];
+  $server['solr_path'] = $form_state['values']['solr_path'];
+  apachesolr_passthru_add_server($server);
+  drupal_goto('admin/settings/apachesolr/otherservers');
+}
+
+function apachesolr_passthru_server_form_validate(&$form, $form_state) {
+  // Test a connection to the server
+  $solr_host = $form_state['values']['solr_url'];
+  $solr_port = $form_state['values']['solr_port'];
+  $solr_path = $form_state['values']['solr_path'];
+  try {
+    $solr_service = apachesolr_get_solr($solr_host,$solr_port,$solr_path);
+  }
+  catch(Exception $e) {
+    form_set_error('name', 
+                   t('Problem connecting to server')); 
+    drupal_set_message(nl2br(check_plain($e->getMessage())), "warning");
+  }
+}
+
+
+/**
+ * Defgroup: Solr server admin api functions
+ * Use a system variable for the moment but keep a little abstraction.
+ */
+
+/**
+ * Get a list of servers which are available to the apachesolr module
+ */
+function apachesolr_passthru_get_servers() {
+  return variable_get('apachesolr_passthru_servers',array());
+}
+
+function apachesolr_passthru_add_server($new_server_def) {
+   $servers = apachesolr_passthru_get_servers();
+   // TODO a whole load of validation.
+   $servers[$new_server_def['name']] = $new_server_def;
+   variable_set('apachesolr_passthru_servers',$servers);
+ }
+ 
+function apachesolr_passthru_del_server($server_name) {
+   $servers = apachesolr_passthru_get_servers();
+   unset($servers[$server_name]);
+   variable_set('apachesolr_passthru_servers',$servers);
+}
