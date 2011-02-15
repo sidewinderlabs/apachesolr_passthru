@@ -11,12 +11,12 @@ function apachesolr_passthru_views_data() {
   $solr_servers = apachesolr_passthru_get_servers() ;
   
   foreach($solr_servers as $solr_server) {
-    $table_name = 'solr_server_' . $solr_server['name'];
+    $table_name = 'solr_server_' . $solr_server['machine_name'];
     
     // TODO: save human name as well
     $data[$table_name]['table']['group'] = 'Solr Server';
     $data[$table_name]['table']['base'] = array(
-      'title' => t('Solr Query ' . $solr_server['name']),
+      'title' => t('Solr Query on server: %server_name', array('%server_name' => $solr_server['human_name'])),
       'help' => t('Solr search independent of Drupal schema.'),
       'query class' => 'apachesolr_passthru_views_query',
     ); 
@@ -34,7 +34,7 @@ function apachesolr_passthru_views_data() {
       ),
     );
 
-    $fields = _get_apachesolr_passthru_field_list($solr_server['solr_url'],$solr_server['solr_port'],$solr_server['solr_path']);
+    $fields = _get_apachesolr_passthru_field_list($solr_server['solr_host'],$solr_server['solr_port'],$solr_server['solr_path']);
     foreach($fields as $field) {
       $data[$table_name][$field[0]] = array(
         'title' => t($field[0]),

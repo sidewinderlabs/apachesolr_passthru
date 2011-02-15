@@ -18,7 +18,7 @@ class apachesolr_passthru_views_query extends apachesolr_views_query implements 
     $solr_server_name = str_replace('solr_server_','',$base_table);
     $solr_server_details = apachesolr_passthru_get_server($solr_server_name);
     
-    $this->solr_host = $solr_server_details['solr_url'];
+    $this->solr_host = $solr_server_details['solr_host'];
     $this->solr_port = $solr_server_details['solr_port'];
     $this->solr_path = $solr_server_details['solr_path'];
     
