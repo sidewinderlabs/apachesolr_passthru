@@ -152,7 +152,7 @@ function apachesolr_passthru_menu() {
       'access arguments' => array('administer search'),
       'type' => MENU_LOCAL_TASK,
    ),
-   // Callback to add/edit server form
+   // Callback to add server form
    'admin/settings/apachesolr/otherservers/add' => array(
       'title' => 'add/edit server',
       'description' => 'callback for adding editing a form',
@@ -162,6 +162,25 @@ function apachesolr_passthru_menu() {
       'type' => MENU_CALLBACK,
    ),
    // Callback to delete a server
+   'admin/settings/apachesolr/otherservers/delete' => array(
+      'title' => 'delete solr server',
+      'description' => 'callback for deleting a solr server def',
+      'page callback' => 'apachesolr_passthru_server_action_del',
+      'page arguments' => array(5),
+      'access arguments' => array('administer search'),
+      'type' => MENU_CALLBACK,
+   ),
+   
+   // Callback to add server form
+   'admin/settings/apachesolr/otherservers/edit' => array(
+      'title' => 'add/edit server',
+      'description' => 'callback for adding editing a form',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('apachesolr_passthru_server_form',5),
+      'access arguments' => array('administer search'),
+      'type' => MENU_CALLBACK,
+   ),
+   
  ); 
 }
 
@@ -175,8 +194,38 @@ function apachesolr_passthru_setup() {
 
   $output_table_headers = array( 'Server Name', 'server address', 'server port', 'server path', 'status', 'action');
   $output_table_rows = array();
-  foreach($servers as $server) {
-    $output_table_rows[] = array($server['name'],$server['solr_url'],$server['solr_port'],$server['solr_path'],'test','test');
+  foreach($servers as $name => $server) {
+    // Test the server connection 
+    $connect = FALSE;
+    try {
+      $solr_service = apachesolr_get_solr($server['solr_url'],$server['solr_port'],$server['solr_path']);
+      $connect = TRUE;
+    }
+    catch(Exception $e) {
+      drupal_set_message(nl2br(check_plain($e->getMessage())), "warning");
+    }
+    
+    if($connect) {
+      $connect_output = 'OK';
+    }
+    else {
+      $connect_output = 'Error';
+    }
+    
+    // Define actions to be performed on endpoints
+    if ($name != 'site_default') {
+    $actions = l('edit','admin/settings/apachesolr/otherservers/edit/'.$name);
+    $actions .= ', ' . l('delete','admin/settings/apachesolr/otherservers/delete/'.$name);    
+    }
+    else {
+      $actions = 'none';
+    }
+    $output_table_rows[] = array($server['name'], 
+                                 $server['solr_url'],
+                                 $server['solr_port'],
+                                 $server['solr_path'],
+                                 $connect_output,
+                                 $actions);
   }
   if (sizeof($servers) > 0 ) {
   
@@ -198,17 +247,43 @@ function apachesolr_passthru_setup() {
  * Generate a form for the solr server admin page.
  * @param unknown_type $form_state
  */
-function apachesolr_passthru_server_form($form_state) {
+function apachesolr_passthru_server_form($form_state, $server_name = NULL) {
   $form = array();
   
+  if ($server_name) {
+   
+    $server_details = apachesolr_passthru_get_server($server_name);
+    $name = $server_details['name'];
+    $solr_url = $server_details['solr_url'];
+    $solr_port = $server_details['solr_port'];
+    $solr_path = $server_details['solr_path'];
+  }
+  else {
+    $name = '';
+    $solr_url = '';
+    $solr_port = '';
+    $solr_path = '';
+    
+  }
+  
+
   $form['name'] = array('#type' => 'textfield',
-                        '#title' => t('Server Name'));
+                        '#title' => t('Server Name'),
+                        '#default_value' => $name,
+                       );
   $form['solr_url'] = array('#type' => 'textfield',
-                        '#title' => t('Server Address'));
+                        '#title' => t('Server Address'),
+                        '#default_value' =>$solr_url,
+  
+                       );
   $form['solr_port'] = array('#type' => 'textfield',
-                        '#title' => t('Server Port'));
+                        '#title' => t('Server Port'),
+                        '#default_value' => $solr_port,
+                       );
   $form['solr_path'] = array('#type' => 'textfield',
-                        '#title' => t('Server Path'));
+                        '#title' => t('Server Path'),
+                        '#default_value' => $solr_path,
+                       );
   $form['submit_button'] = array('#type' => 'submit',
                           '#value' => t('Save Server Details'),
                           );
@@ -224,6 +299,7 @@ function apachesolr_passthru_server_form_submit(&$form, $form_state) {
   $server['solr_url'] = $form_state['values']['solr_url'];
   $server['solr_port'] = $form_state['values']['solr_port'];
   $server['solr_path'] = $form_state['values']['solr_path'];
+  apachesolr_passthru_del_server($server['name']);
   apachesolr_passthru_add_server($server);
   drupal_goto('admin/settings/apachesolr/otherservers');
 }
@@ -243,6 +319,16 @@ function apachesolr_passthru_server_form_validate(&$form, $form_state) {
   }
 }
 
+/**
+ * 
+ * Menu Callback for deleting a server instance
+ * @param string $server_name the machine name of the server def to be deleted.
+ */
+function apachesolr_passthru_server_action_del($server_name) {
+   apachesolr_passthru_del_server($server_name);
+   drupal_set_message('Server def deleted');
+   drupal_goto('admin/settings/apachesolr/otherservers');
+}
 
 /**
  * Defgroup: Solr server admin api functions
@@ -256,7 +342,7 @@ function apachesolr_passthru_get_servers() {
   $servers = variable_get('apachesolr_passthru_servers',array());
   // Append the site default server to the list of server
   $servers['site_default'] = array(
-    'name' => t('site default'),
+    'name' => t('site_default'),
     'solr_url' => variable_get('apachesolr_host', 'localhost'),
     'solr_port' => variable_get('apachesolr_port', '8983'),
     'solr_path' => variable_get('apachesolr_path', '/solr'),
