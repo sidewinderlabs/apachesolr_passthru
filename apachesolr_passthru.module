@@ -253,7 +253,15 @@ function apachesolr_passthru_server_form_validate(&$form, $form_state) {
  * Get a list of servers which are available to the apachesolr module
  */
 function apachesolr_passthru_get_servers() {
-  return variable_get('apachesolr_passthru_servers',array());
+  $servers = variable_get('apachesolr_passthru_servers',array());
+  // Append the site default server to the list of server
+  $servers['site_default'] = array(
+    'name' => t('site default'),
+    'solr_url' => variable_get('apachesolr_host', 'localhost'),
+    'solr_port' => variable_get('apachesolr_port', '8983'),
+    'solr_path' => variable_get('apachesolr_path', '/solr'),
+  );
+  return $servers;
 }
 
 function apachesolr_passthru_get_server($server_name) {

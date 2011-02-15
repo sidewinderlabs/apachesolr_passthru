@@ -52,9 +52,7 @@ function apachesolr_passthru_views_data() {
   }
     
   }
-  
-  krumo($data);
-
+ 
   return $data;
 }
 
