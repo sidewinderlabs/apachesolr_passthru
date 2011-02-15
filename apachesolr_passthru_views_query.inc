@@ -13,28 +13,26 @@ class apachesolr_passthru_views_query extends apachesolr_views_query implements 
     $this->base_field = $base_field;
     $this->sql_base_table = substr($base_table, 11);
     
-    $this->solr_host = $options['solr_url'];
-    $this->solr_port = $options['solr_port'];
-    $this->solr_path = $options['solr_path'];
+    // Determine the solr server name from the base table name
+    // TODO: Investigate if this can be passed as an option.
+    $solr_server_name = str_replace('solr_server_','',$base_table);
+    $solr_server_details = apachesolr_passthru_get_server($solr_server_name);
     
-    // TODO, can we change this here, that would be ace.
+    $this->solr_host = $solr_server_details['solr_url'];
+    $this->solr_port = $solr_server_details['solr_port'];
+    $this->solr_path = $solr_server_details['solr_path'];
+    
     $this->_solr_service = apachesolr_get_solr($this->solr_host,$this->solr_port,$this->solr_path);
 
+    
+    
     module_load_include('inc', 'views', 'plugins/views_plugin_query_default');
     $this->_db_query = new views_plugin_query_default;
     $this->_db_query->init($this->sql_base_table, $base_field, $options);
 
     $this->id = ++self::$idCount;
 
-    $data = views_fetch_data($base_table);
-    foreach ($data as $field_name => $field) {
-      if (!empty($field['sort'])) {
-        $this->_available_sorts[$field_name] = array(
-          'name' => $field['title'],
-          'default' => 'asc', // TODO: make this part of the handler def? So it will be in the Views data definition
-        );
-      }
-    }
+   
   }
 
    function options_form(&$form, &$form_state) {

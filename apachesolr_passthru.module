@@ -18,10 +18,15 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
   }
 }
 
-function _get_apachesolr_passthru_field_list() {
+function _get_apachesolr_passthru_field_list($solr_server = NULL,$solr_port = NULL, $solr_path = NULL) {
   $data = (object) array();
   try {
-    $solr = apachesolr_get_solr();
+    if ($solr_server == NULL || $solr_port == NULL || $solr_path == NULL) {
+      $solr = apachesolr_get_solr();
+    }
+    else {
+      $solr = apachesolr_get_solr($solr_server,$solr_port,$solr_path);
+    }
     $data = $solr->getLuke();
   }
   catch (Exception $e) {
@@ -249,6 +254,12 @@ function apachesolr_passthru_server_form_validate(&$form, $form_state) {
  */
 function apachesolr_passthru_get_servers() {
   return variable_get('apachesolr_passthru_servers',array());
+}
+
+function apachesolr_passthru_get_server($server_name) {
+  $servers = apachesolr_passthru_get_servers();
+  // TODO validation and error checking
+  return $servers[$server_name]; 
 }
 
 function apachesolr_passthru_add_server($new_server_def) {

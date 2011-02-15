@@ -8,48 +8,53 @@ function apachesolr_passthru_views_data() {
   $view = NULL;
   $display_name = NULL;
 
-  $data['solr_ep']['table']['group'] = t('Any Solr Search');
+  $solr_servers = apachesolr_passthru_get_servers() ;
+  
+  foreach($solr_servers as $solr_server) {
+    $table_name = 'solr_server_' . $solr_server['name'];
+    
+    // TODO: save human name as well
+    $data[$table_name]['table']['group'] = 'Solr Server';
+    $data[$table_name]['table']['base'] = array(
+      'title' => t('Solr Query ' . $solr_server['name']),
+      'help' => t('Solr search independent of Drupal schema.'),
+      'query class' => 'apachesolr_passthru_views_query',
+    ); 
 
-  $data['solr_ep']['table']['base'] = array(
-    'title' => t('Solr Query'),
-    'help' => t('Solr search independent of Drupal schema.'),
-    'query class' => 'apachesolr_passthru_views_query',
-  );
-
-  // The solr search should have a search term
-  $data['solr_ep']['text'] = array(
-    'title' => t('Search'),
-    'help' => t('Searches the content with Solr'),
-    'filter' => array(
-      'handler' => 'apachesolr_views_handler_filter_search',
-  ),
-    'argument' => array(     
-      'handler' => 'apachesolr_views_handler_argument_search',     
-  ),
-  );
-
-  // Get the field types from the current endpoint and add them.
-
-  /* THIS IS A hack, we shoud define and manage solr servers outside of the view,
-   * and allow the fields to be available at all times
-   */
-
-  $fields = _get_apachesolr_passthru_field_list();
-  foreach($fields as $field) {
-    $data['solr_ep'][$field[0]] = array(
-      'title' => t($field[0]),
-      'help' => t("Pass-thru index:" . $field[0]),
-      'argument' => array(
-        'handler' => 'apachesolr_passthru_handler_argument_text',
-    ),
-      'field' => array(
-        'handler' => 'apachesolr_passthru_handler_field_text',
-    ),
+    
+    // The solr search should have a search term
+    $data[$table_name]['text'] = array(
+      'title' => t('Search'),
+      'help' => t('Searches the content with Solr'),
       'filter' => array(
-        'handler' => 'apachesolr_passthru_handler_filter_text',
-    ),
+        'handler' => 'apachesolr_views_handler_filter_search',
+      ),
+      'argument' => array(     
+        'handler' => 'apachesolr_views_handler_argument_search',     
+      ),
+    );
+
+    $fields = _get_apachesolr_passthru_field_list($solr_server['solr_url'],$solr_server['solr_port'],$solr_server['solr_path']);
+    foreach($fields as $field) {
+      $data[$table_name][$field[0]] = array(
+        'title' => t($field[0]),
+        'help' => t("Pass-thru index:" . $field[0]),
+        'argument' => array(
+          'handler' => 'apachesolr_passthru_handler_argument_text',
+      ),
+        'field' => array(
+          'handler' => 'apachesolr_passthru_handler_field_text',
+      ),
+        'filter' => array(
+          'handler' => 'apachesolr_passthru_handler_filter_text',
+      ),
     );
   }
+    
+  }
+  
+  krumo($data);
+
   return $data;
 }
 
@@ -94,6 +99,7 @@ function apachesolr_passthru_views_plugins() {
  * Implementation of hook_views_data_alter(&$data).
  */
 function apachesolr_passthru_views_data_alter(&$data) {
+
   $fields = _get_apachesolr_passthru_field_list();
   foreach($fields as $field) {
     $data['apachesolr_node'][$field[0]] = array(
