@@ -17,7 +17,7 @@ class apachesolr_passthru_handler_argument_text
       $arg_value[] = apachesolr_views_query::escape_term($facet_value);
     }
     $this->query->add_filter($this->real_field, implode(" OR ", $arg_value), $this->options['not']);
-    $this->query->set_query("*");
+    $this->query->set_query("*:*");
   }
 
   function option_definition() {
