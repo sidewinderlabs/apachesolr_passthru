@@ -58,7 +58,6 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
    // Remove text as a filter here 
    if ($filter['#name'] == 'text' && $filter['value'] != "*:*") {
      $filter['#value'] = urldecode($filter['#value']);
-     var_dump($filter['#value']);
      $key = $filter['#value'];
    }
    $query->add_filter($filter['#name'],$filter['#value']);
@@ -74,8 +73,6 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
     //
     $params['fl'] .= ',address_line_1,address_line_2,address_line_3,address_line_4,company_number,postcode,sic_trade_classification_code';
   }
-  
-//var_dump($query->get_query_basic());
 }
 
 function _get_apachesolr_passthru_field_list($solr_server = NULL,$solr_port = NULL, $solr_path = NULL) {
