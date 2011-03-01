@@ -60,7 +60,9 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
      $filter['#value'] = urldecode($filter['#value']);
      $key = $filter['#value'];
    }
-   $query->add_filter($filter['#name'],'"' .$filter['#value'] . '"');
+   else { 
+     $query->add_filter($filter['#name'],'"' . $filter['#value'] . '"');
+   }
  } 
 
  
@@ -167,7 +169,7 @@ function apachesolr_passthru_block($op = 'list', $delta = 0, $edit = array()) {
         include_once drupal_get_path('module', $module) .'/'. $solr_search_class .'.php';
         $filters = $_GET['filters']; 
         if (strpos($filters,'text:') === FALSE && $_GET['text']) {
-          $filters .= 'text:"' . urlencode($_GET['text']) .'"';
+          $filters .= 'text:' . urlencode($_GET['text']);
         }
 
         
@@ -175,10 +177,10 @@ function apachesolr_passthru_block($op = 'list', $delta = 0, $edit = array()) {
         $enabled_facets = apachesolr_get_enabled_facets('apachesolr_passthru');
         $facets = apachesolr_passthru_apachesolr_facets();
         $facet = $facets[$enabled_facets[$delta]];
+
         if (empty($facet)) {
           return;
         }
-
 
         return apachesolr_facet_block($response, $query, 'apachesolr_passthru', $delta, $facet['facet_field'], t($facet['info']));
       }
