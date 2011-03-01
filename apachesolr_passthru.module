@@ -45,6 +45,7 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
   
 
  $solr_filters = $solr_query->get_filters();
+
  if ($query->get_query_basic() == NULL) {
   $key = '*:*';
  }
@@ -56,6 +57,8 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
  foreach ($solr_filters as $filter) {
    // Remove text as a filter here 
    if ($filter['#name'] == 'text' && $filter['value'] != "*:*") {
+     $filter['#value'] = urldecode($filter['#value']);
+     var_dump($filter['#value']);
      $key = $filter['#value'];
    }
    $query->add_filter($filter['#name'],$filter['#value']);
@@ -72,7 +75,7 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
     $params['fl'] .= ',address_line_1,address_line_2,address_line_3,address_line_4,company_number,postcode,sic_trade_classification_code';
   }
   
-
+//var_dump($query->get_query_basic());
 }
 
 function _get_apachesolr_passthru_field_list($solr_server = NULL,$solr_port = NULL, $solr_path = NULL) {
@@ -166,9 +169,11 @@ function apachesolr_passthru_block($op = 'list', $delta = 0, $edit = array()) {
         list($module, $solr_search_class) = variable_get('apachesolr_query_class', array('apachesolr', 'Solr_Base_Query'));
         include_once drupal_get_path('module', $module) .'/'. $solr_search_class .'.php';
         $filters = $_GET['filters']; 
-        if(!strpos($filters,'text:') && $_GET['text']) {
-          $filters .= 'text:' . $_GET['text'];
+        if (strpos($filters,'text:') === FALSE && $_GET['text']) {
+          $filters .= 'text:"' . urlencode($_GET['text']) .'"';
         }
+
+        
         $query = new $solr_search_class(apachesolr_get_solr(), '' , $filters , $views_query->get_solrsort() , $views_query->get_path());
         $enabled_facets = apachesolr_get_enabled_facets('apachesolr_passthru');
         $facets = apachesolr_passthru_apachesolr_facets();
