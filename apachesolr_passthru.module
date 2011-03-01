@@ -176,8 +176,10 @@ function apachesolr_passthru_block($op = 'list', $delta = 0, $edit = array()) {
         $query = new $solr_search_class(apachesolr_get_solr(), '' , $filters , $views_query->get_solrsort() , $views_query->get_path());
         $enabled_facets = apachesolr_get_enabled_facets('apachesolr_passthru');
         $facets = apachesolr_passthru_apachesolr_facets();
+        // Custom terms here TODO: do better
+        $facets['sic_terms']['info'] = "Filter by industry";
+        
         $facet = $facets[$enabled_facets[$delta]];
-
         if (empty($facet)) {
           return;
         }
