@@ -60,7 +60,7 @@ function apachesolr_passthru_apachesolr_modify_query(&$query, &$params, $caller)
      $filter['#value'] = urldecode($filter['#value']);
      $key = $filter['#value'];
    }
-   $query->add_filter($filter['#name'],$filter['#value']);
+   $query->add_filter($filter['#name'],'"' .$filter['#value'] . '"');
  } 
 
  
