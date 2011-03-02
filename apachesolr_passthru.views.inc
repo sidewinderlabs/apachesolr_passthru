@@ -48,11 +48,14 @@ function apachesolr_passthru_views_data() {
         'filter' => array(
           'handler' => 'apachesolr_passthru_handler_filter_text',
       ),
+        'sort' => array(
+        'handler' => 'apachesolr_views_handler_sort',
+      ), 
     );
   }
     
   }
- 
+
   return $data;
 }
 
