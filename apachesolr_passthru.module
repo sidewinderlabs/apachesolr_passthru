@@ -7,25 +7,6 @@ function apachesolr_passthru_views_api() {
   return array('api' => '3');
 }
 
-/*
- * Alter the exposed form to add the filter params
- */
-function apachesolr_passthru_form_alter(&$form, &$form_state, $form_id) {
-  $view = apachesolr_current_query();
-  if ($view) {
-    // TODO: only do this for the views query form
-    if ($_GET['filters'] && $form['#info']['filter-text_1']) {
-      // Remove text from filters then set as hidden value
-      $filters = preg_replace('/text:[^ ]* ?/i', '', $_GET['filters']);
-      $form['filters'] = array(
-        '#type' => 'hidden',
-        '#value' => $filters,
-      );
-    }
-  } 
-  
-}
-
 /**
  * Implementation of hook_apachesolr_modify_query.
  */
