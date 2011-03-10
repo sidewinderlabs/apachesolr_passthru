@@ -143,11 +143,18 @@ function apachesolr_passthru_block($op = 'list', $delta = 0, $edit = array()) {
     case 'view':
       if (apachesolr_has_searched()) {
         // Get the query and response. Without these no blocks make sense.
-        $response = apachesolr_static_response_cache();
-  
+         $response = apachesolr_static_response_cache();
+         
         if (empty($response)) {
           return;
         }
+
+        // 'Missing this facet' does not work so remove it from the response
+        $facet_counts = (array)$response->facet_counts->facet_fields;
+        foreach($facet_counts as $facet_key => $facet) {
+          unset($response->facet_counts->facet_fields->$facet_key->_empty_);
+        }
+        
         $views_query = apachesolr_current_query();
         list($module, $solr_search_class) = variable_get('apachesolr_query_class', array('apachesolr', 'Solr_Base_Query'));
         include_once drupal_get_path('module', $module) .'/'. $solr_search_class .'.php';
